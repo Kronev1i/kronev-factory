@@ -2,60 +2,140 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0,
+                 maximum-scale=1.0, user-scalable=no"
+    >
+
     <title>KRONEV Factory</title>
-    <script src="https://telegram.org"></script>
+
+    <!-- Telegram Mini Apps SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Lottie -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
     <style>
         :root {
-            --bg-color: #17212b; /* Оригинальный темно-серый фон Telegram */
+            --bg-color: #17212b;
             --bg-secondary: #242f3d;
             --text-color: #f5f6f7;
-            --matrix-neon: #00ff41; /* Яркий салатовый неон */
+
+            --matrix-neon: #00ff41;
             --matrix-dimmed: rgba(0, 255, 65, 0.12);
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Helvetica,
+                Arial,
+                sans-serif;
+
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
+
             padding: 20px;
+
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+
             min-height: 100vh;
-            box-sizing: border-box;
+
             overflow: hidden;
             position: relative;
+
             perspective: 800px;
         }
 
-        /* 3D Ретро-сетка (Оставляем без изменений, как ты просил) */
+        /* =========================
+           3D MATRIX GRID
+        ========================= */
+
         .retro-grid {
             position: absolute;
+
             top: 15%;
             left: 50%;
+
             width: 600px;
             height: 600px;
-            transform: translateX(-50%) rotateX(65deg);
-            background-image: 
-                linear-gradient(var(--matrix-dimmed) 1.5px, transparent 1.5px),
-                linear-gradient(90deg, var(--matrix-dimmed) 1.5px, transparent 1.5px);
+
+            transform:
+                translateX(-50%)
+                rotateX(65deg);
+
+            background-image:
+                linear-gradient(
+                    var(--matrix-dimmed) 1.5px,
+                    transparent 1.5px
+                ),
+                linear-gradient(
+                    90deg,
+                    var(--matrix-dimmed) 1.5px,
+                    transparent 1.5px
+                );
+
             background-size: 40px 40px;
+
             z-index: 1;
-            mask-image: linear-gradient(to bottom, transparent, black 15%, black 75%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 75%, transparent);
-            animation: matrixPulse 6s ease-in-out infinite;
+
+            mask-image:
+                linear-gradient(
+                    to bottom,
+                    transparent,
+                    black 15%,
+                    black 75%,
+                    transparent
+                );
+
+            -webkit-mask-image:
+                linear-gradient(
+                    to bottom,
+                    transparent,
+                    black 15%,
+                    black 75%,
+                    transparent
+                );
+
+            animation:
+                matrixPulse 6s ease-in-out infinite;
         }
+
+        /* =========================
+           PAGES
+        ========================= */
 
         .page {
             width: 100%;
             max-width: 400px;
+
             display: none;
+
             flex-direction: column;
             align-items: center;
+
             text-align: center;
+
             z-index: 2;
         }
 
@@ -63,61 +143,80 @@
             display: flex;
         }
 
-        /* Контейнер для кастомных ТГ-эмодзи */
-        .emoji-box {
-            font-size: 84px;
-            width: 100px;
-            height: 100px;
-            line-height: 100px;
+        /* =========================
+           LOTTIE
+        ========================= */
+
+        .lottie-container {
+            width: 130px;
+            height: 130px;
+
             margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+
             z-index: 2;
-            filter: drop-shadow(0 0 15px rgba(0, 255, 65, 0.4));
+
             user-select: none;
+            pointer-events: none;
         }
 
-        /* Оригинальный ТГ-стайл для 😎 (Зацикленное покачивание и микро-мимика) */
-        .tg-sunglasses {
-            animation: tgCoolAnimate 3s ease-in-out infinite;
-        }
+        /* =========================
+           TEXT
+        ========================= */
 
-        /* Оригинальный ТГ-стайл для ✈️ (Динамический полет со сменой крена) */
-        .tg-plane {
-            animation: tgPlaneAnimate 3s ease-in-out infinite;
-        }
-
-        /* Плавное всплытие текста на 1 сантиметр (12px) */
         .slide-up-text {
             opacity: 0;
-            animation: slideUpIn 0.5s cubic-bezier(0.1, 1, 0.1, 1) forwards;
+
+            animation:
+                slideUpIn
+                0.5s
+                cubic-bezier(0.1, 1, 0.1, 1)
+                forwards;
         }
 
         h1 {
             font-size: 24px;
             font-weight: 700;
-            margin: 0 0 15px 0;
+
+            margin:
+                0 0 15px 0;
+
             letter-spacing: 0.5px;
         }
 
         p {
             font-size: 16px;
+
             color: #b2bec3;
+
             line-height: 1.5;
-            margin: 0 0 35px 0;
+
+            margin:
+                0 0 35px 0;
         }
+
+        /* =========================
+           FORM
+        ========================= */
 
         .form-container {
             width: 100%;
-            background-color: var(--bg-secondary);
+
+            background-color:
+                var(--bg-secondary);
+
             border-radius: 16px;
+
             padding: 22px;
-            box-sizing: border-box;
-            border: 1px solid rgba(0, 255, 65, 0.2);
+
+            border:
+                1px solid
+                rgba(0, 255, 65, 0.2);
+
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.5);
         }
 
         .form-group {
@@ -131,52 +230,96 @@
 
         label {
             display: block;
+
             font-size: 12px;
             font-weight: 700;
-            color: var(--matrix-neon);
+
+            color:
+                var(--matrix-neon);
+
             margin-bottom: 8px;
+
             text-transform: uppercase;
+
             letter-spacing: 1.5px;
         }
 
         input {
             width: 100%;
+
             padding: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            border:
+                1px solid
+                rgba(255, 255, 255, 0.08);
+
             border-radius: 10px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+
+            background-color:
+                var(--bg-color);
+
+            color:
+                var(--text-color);
+
             font-size: 16px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
+
+            transition:
+                all 0.3s ease;
         }
 
         input:focus {
             outline: none;
-            border-color: var(--matrix-neon);
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+
+            border-color:
+                var(--matrix-neon);
+
+            box-shadow:
+                0 0 10px
+                rgba(0, 255, 65, 0.25);
         }
 
-        /* 👑 ОБНОВЛЕННАЯ КНОПКА: Сплошной яркий неон, без бортиков, белый текст */
+        /* =========================
+           BUTTON
+        ========================= */
+
         .btn {
             width: 100%;
-            background-color: var(--matrix-neon);
-            color: #ffffff; /* Белый текст */
-            border: none; /* Убрали бортик */
+
+            background-color:
+                var(--matrix-neon);
+
+            color: #ffffff;
+
+            border: none;
+
             border-radius: 12px;
+
             padding: 16px;
+
             font-size: 16px;
             font-weight: 700;
+
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.4); /* Плотное неоновое свечение */
+
+            transition:
+                all 0.2s ease;
+
+            box-shadow:
+                0 4px 20px
+                rgba(0, 255, 65, 0.4);
+
             letter-spacing: 0.5px;
         }
 
         .btn:active {
             transform: scale(0.97);
-            background-color: #00d436; /* Слегка темнеет при клике */
-            box-shadow: 0 0 25px var(--matrix-neon);
+
+            background-color:
+                #00d436;
+
+            box-shadow:
+                0 0 25px
+                var(--matrix-neon);
         }
 
         .btn:disabled {
@@ -184,118 +327,905 @@
             cursor: not-allowed;
         }
 
-        /* --- АНИМАЦИИ --- */
+        /* =========================
+           ANIMATIONS
+        ========================= */
+
         @keyframes matrixPulse {
-            0%, 100% { opacity: 0.25; }
-            50% { opacity: 0.55; }
+            0%,
+            100% {
+                opacity: 0.25;
+            }
+
+            50% {
+                opacity: 0.55;
+            }
         }
 
         @keyframes slideUpIn {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform:
+                    translateY(12px);
             }
+
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform:
+                    translateY(0);
             }
-        }
-
-        /* Имитация Lottie-шейпов для 😎 (плавное зацикленное сжатие, расширение и наклон) */
-        @keyframes tgCoolAnimate {
-            0%, 100% { transform: scale(1) translateY(0) rotate(0deg); }
-            25% { transform: scale(1.06) translateY(-6px) rotate(-3deg); }
-            50% { transform: scale(0.95) translateY(2px) rotate(3deg); }
-            75% { transform: scale(1.02) translateY(-2px) rotate(-1deg); }
-        }
-
-        /* Имитация Lottie-шейпов для бумажного самолетика ✈️ */
-        @keyframes tgPlaneAnimate {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            30% { transform: translate(6px, -8px) rotate(-6deg) scale(1.04); }
-            65% { transform: translate(-3px, -2px) rotate(4deg) scale(0.96); }
         }
     </style>
 </head>
+
 <body>
 
-    <!-- 3D Сетка на фоне -->
+    <!-- MATRIX GRID -->
     <div class="retro-grid"></div>
 
-    <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
-    <div id="pageWelcome" class="page active">
-        <!-- Встроенный анимированный эмодзи в очках -->
-        <div class="emoji-box tg-sunglasses">😎</div>
-        <div class="slide-up-text" id="welcomeText">
-            <h1>Создай своего KRONEV</h1>
-            <p>Привет! Здесь ты можешь создать своего личного KRONEV для автоматизации бизнеса. Начнём?</p>
+
+    <!-- =================================
+         PAGE 1 — WELCOME
+    ================================== -->
+
+    <div
+        id="pageWelcome"
+        class="page active"
+    >
+
+        <div
+            id="lottieWelcome"
+            class="lottie-container"
+        ></div>
+
+        <div
+            class="slide-up-text"
+            id="welcomeText"
+        >
+
+            <h1>
+                Создай своего KRONEV
+            </h1>
+
+            <p>
+                Привет! Здесь ты можешь создать
+                своего личного KRONEV для
+                автоматизации бизнеса.
+                Начнём?
+            </p>
+
         </div>
-        <button class="btn" onclick="goToForm()">🚀 Начать</button>
+
+        <button
+            class="btn"
+            onclick="goToForm()"
+        >
+            🚀 Начать
+        </button>
+
     </div>
 
-    <!-- ЭКРАН 2: ВВОД ДАННЫХ -->
-    <div id="pageForm" class="page">
-        <!-- Встроенный анимированный самолётик -->
-        <div class="emoji-box tg-plane">✈️</div>
-        <div class="slide-up-text" id="formText">
-            <h1>Параметры робота</h1>
-            <p>Задайте базовые имя и юзернейм для автоматического развертывания.</p>
+
+    <!-- =================================
+         PAGE 2 — FORM
+    ================================== -->
+
+    <div
+        id="pageForm"
+        class="page"
+    >
+
+        <div
+            id="lottieForm"
+            class="lottie-container"
+        ></div>
+
+        <div
+            class="slide-up-text"
+            id="formText"
+        >
+
+            <h1>
+                Параметры робота
+            </h1>
+
+            <p>
+                Задайте базовые имя и
+                юзернейм для автоматического
+                развертывания.
+            </p>
+
         </div>
-        
+
+
         <div class="form-container">
+
             <div class="form-group">
-                <label>🏷️ Название бота</label>
-                <input type="text" id="botName" value="KRONEV Business Bot">
+
+                <label>
+                    🏷️ Название бота
+                </label>
+
+                <input
+                    type="text"
+                    id="botName"
+                    value="KRONEV Business Bot"
+                    autocomplete="off"
+                >
+
             </div>
+
+
             <div class="form-group">
-                <label>🔗 Юзернейм бота (@)</label>
-                <input type="text" id="botUsername" value="KronevTestBot">
+
+                <label>
+                    🔗 Юзернейм бота (@)
+                </label>
+
+                <input
+                    type="text"
+                    id="botUsername"
+                    value="KronevTestBot"
+                    autocomplete="off"
+                >
+
             </div>
+
         </div>
 
-        <button class="btn" id="submitBtn" onclick="submitData()">✨ Сгенерировать бота</button>
+
+        <button
+            class="btn"
+            id="submitBtn"
+            onclick="submitData()"
+        >
+            ✨ Сгенерировать бота
+        </button>
+
     </div>
+
 
     <script>
+
+        /* =================================
+           TELEGRAM
+        ================================== */
+
         const tg = window.Telegram.WebApp;
+
         tg.ready();
         tg.expand();
 
+
+        /* =================================
+           LOTTIE
+        ================================== */
+
+        const sunglassesEmojiData = {
+            "v": "5.5.7",
+            "fr": 60,
+            "ip": 0,
+            "op": 180,
+            "w": 512,
+            "h": 512,
+            "nm": "Cool Emoji",
+            "ddd": 0,
+            "assets": [],
+            "layers": [
+                {
+                    "ddd": 0,
+                    "ind": 1,
+                    "ty": 4,
+                    "nm": "Glass_Left",
+                    "sr": 1,
+
+                    "ks": {
+                        "o": {
+                            "a": 0,
+                            "k": 100
+                        },
+
+                        "r": {
+                            "a": 1,
+                            "k": [
+                                {
+                                    "t": 0,
+                                    "s": [0]
+                                },
+                                {
+                                    "t": 45,
+                                    "s": [-4]
+                                },
+                                {
+                                    "t": 90,
+                                    "s": [0]
+                                },
+                                {
+                                    "t": 135,
+                                    "s": [-2]
+                                },
+                                {
+                                    "t": 180,
+                                    "s": [0]
+                                }
+                            ]
+                        },
+
+                        "p": {
+                            "a": 1,
+                            "k": [
+                                {
+                                    "t": 0,
+                                    "s": [256, 256, 0]
+                                },
+                                {
+                                    "t": 45,
+                                    "s": [256, 260, 0]
+                                },
+                                {
+                                    "t": 90,
+                                    "s": [256, 256, 0]
+                                },
+                                {
+                                    "t": 180,
+                                    "s": [256, 256, 0]
+                                }
+                            ]
+                        },
+
+                        "a": {
+                            "a": 0,
+                            "k": [256, 256, 0]
+                        },
+
+                        "s": {
+                            "a": 1,
+                            "k": [
+                                {
+                                    "t": 0,
+                                    "s": [100, 100, 100]
+                                },
+                                {
+                                    "t": 45,
+                                    "s": [106, 106, 100]
+                                },
+                                {
+                                    "t": 90,
+                                    "s": [95, 95, 100]
+                                },
+                                {
+                                    "t": 180,
+                                    "s": [100, 100, 100]
+                                }
+                            ]
+                        }
+                    },
+
+                    "shapes": [
+                        {
+                            "ty": "gr",
+
+                            "it": [
+                                {
+                                    "d": 1,
+                                    "ty": "el",
+                                    "s": {
+                                        "a": 0,
+                                        "k": [400, 400]
+                                    },
+                                    "p": {
+                                        "a": 0,
+                                        "k": [0, 0]
+                                    },
+                                    "nm": "Circle"
+                                },
+
+                                {
+                                    "ty": "fl",
+                                    "c": {
+                                        "a": 0,
+                                        "k": [1, 0.77, 0]
+                                    },
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+                                    "nm": "Yellow Fill"
+                                },
+
+                                {
+                                    "ty": "tr",
+                                    "p": {
+                                        "a": 0,
+                                        "k": [0, 0]
+                                    },
+                                    "r": {
+                                        "a": 0,
+                                        "k": 0
+                                    },
+                                    "s": {
+                                        "a": 0,
+                                        "k": [100, 100]
+                                    },
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+                                    "nm": "Transform"
+                                }
+                            ]
+                        },
+
+                        {
+                            "ty": "gr",
+
+                            "it": [
+                                {
+                                    "ty": "path",
+
+                                    "ks": {
+                                        "a": 0,
+
+                                        "k": {
+                                            "i": [
+                                                [0, -20],
+                                                [20, 0],
+                                                [0, 20],
+                                                [-20, 0]
+                                            ],
+
+                                            "o": [
+                                                [0, 20],
+                                                [-20, 0],
+                                                [0, -20],
+                                                [20, 0]
+                                            ],
+
+                                            "v": [
+                                                [60, 0],
+                                                [0, 40],
+                                                [-60, 0],
+                                                [0, -40]
+                                            ],
+
+                                            "c": true
+                                        }
+                                    },
+
+                                    "nm": "Glasses"
+                                },
+
+                                {
+                                    "ty": "fl",
+
+                                    "c": {
+                                        "a": 0,
+                                        "k": [0.1, 0.1, 0.1]
+                                    },
+
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+
+                                    "nm": "Black Fill"
+                                },
+
+                                {
+                                    "ty": "tr",
+
+                                    "p": {
+                                        "a": 0,
+                                        "k": [0, 0]
+                                    },
+
+                                    "r": {
+                                        "a": 0,
+                                        "k": 0
+                                    },
+
+                                    "s": {
+                                        "a": 0,
+                                        "k": [100, 100]
+                                    },
+
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+
+                                    "nm": "Transform"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+
+        /*
+         * Самолётик.
+         *
+         * Здесь я исправил битые значения:
+         *
+         * "135 Pall" → "135"
+         * "45px"     → "45"
+         * "\:true"   → ":true"
+         */
+
+        const airplaneEmojiData = {
+            "v": "5.5.7",
+            "fr": 60,
+            "ip": 0,
+            "op": 180,
+            "w": 512,
+            "h": 512,
+            "nm": "Paper Plane",
+            "ddd": 0,
+            "assets": [],
+
+            "layers": [
+                {
+                    "ddd": 0,
+                    "ind": 1,
+                    "ty": 4,
+                    "nm": "Plane_Body",
+                    "sr": 1,
+
+                    "ks": {
+                        "o": {
+                            "a": 0,
+                            "k": 100
+                        },
+
+                        "r": {
+                            "a": 1,
+                            "k": [
+                                {
+                                    "t": 0,
+                                    "s": [0]
+                                },
+                                {
+                                    "t": 40,
+                                    "s": [-8]
+                                },
+                                {
+                                    "t": 90,
+                                    "s": [4]
+                                },
+                                {
+                                    "t": 140,
+                                    "s": [-3]
+                                },
+                                {
+                                    "t": 180,
+                                    "s": [0]
+                                }
+                            ]
+                        },
+
+                        "p": {
+                            "a": 1,
+                            "k": [
+                                {
+                                    "t": 0,
+                                    "s": [256, 256, 0]
+                                },
+                                {
+                                    "t": 45,
+                                    "s": [262, 248, 0]
+                                },
+                                {
+                                    "t": 90,
+                                    "s": [254, 254, 0]
+                                },
+                                {
+                                    "t": 135,
+                                    "s": [259, 252, 0]
+                                },
+                                {
+                                    "t": 180,
+                                    "s": [256, 256, 0]
+                                }
+                            ]
+                        },
+
+                        "a": {
+                            "a": 0,
+                            "k": [256, 256, 0]
+                        },
+
+                        "s": {
+                            "a": 1,
+                            "k": [
+                                {
+                                    "t": 0,
+                                    "s": [100, 100, 100]
+                                },
+                                {
+                                    "t": 45,
+                                    "s": [104, 104, 100]
+                                },
+                                {
+                                    "t": 90,
+                                    "s": [96, 96, 100]
+                                },
+                                {
+                                    "t": 180,
+                                    "s": [100, 100, 100]
+                                }
+                            ]
+                        }
+                    },
+
+                    "shapes": [
+
+                        {
+                            "ty": "gr",
+
+                            "it": [
+                                {
+                                    "ty": "path",
+
+                                    "ks": {
+                                        "a": 0,
+
+                                        "k": {
+                                            "i": [
+                                                [0, 0],
+                                                [0, 0],
+                                                [0, 0]
+                                            ],
+
+                                            "o": [
+                                                [0, 0],
+                                                [0, 0],
+                                                [0, 0]
+                                            ],
+
+                                            "v": [
+                                                [-100, 20],
+                                                [120, -80],
+                                                [-20, 80]
+                                            ],
+
+                                            "c": true
+                                        }
+                                    },
+
+                                    "nm": "Main Wing"
+                                },
+
+                                {
+                                    "ty": "fl",
+
+                                    "c": {
+                                        "a": 0,
+                                        "k": [0.2, 0.65, 0.88]
+                                    },
+
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+
+                                    "nm": "Telegram Blue"
+                                },
+
+                                {
+                                    "ty": "tr",
+
+                                    "p": {
+                                        "a": 0,
+                                        "k": [0, 0]
+                                    },
+
+                                    "r": {
+                                        "a": 0,
+                                        "k": 0
+                                    },
+
+                                    "s": {
+                                        "a": 0,
+                                        "k": [100, 100]
+                                    },
+
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+
+                                    "nm": "Transform"
+                                }
+                            ]
+                        },
+
+
+                        {
+                            "ty": "gr",
+
+                            "it": [
+                                {
+                                    "ty": "path",
+
+                                    "ks": {
+                                        "a": 0,
+
+                                        "k": {
+                                            "i": [
+                                                [0, 0],
+                                                [0, 0],
+                                                [0, 0]
+                                            ],
+
+                                            "o": [
+                                                [0, 0],
+                                                [0, 0],
+                                                [0, 0]
+                                            ],
+
+                                            "v": [
+                                                [-100, 20],
+                                                [-20, 40],
+                                                [-20, 80]
+                                            ],
+
+                                            "c": true
+                                        }
+                                    },
+
+                                    "nm": "Shadow Wing"
+                                },
+
+                                {
+                                    "ty": "fl",
+
+                                    "c": {
+                                        "a": 0,
+                                        "k": [0.15, 0.5, 0.75]
+                                    },
+
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+
+                                    "nm": "Dark Blue"
+                                },
+
+                                {
+                                    "ty": "tr",
+
+                                    "p": {
+                                        "a": 0,
+                                        "k": [0, 0]
+                                    },
+
+                                    "r": {
+                                        "a": 0,
+                                        "k": 0
+                                    },
+
+                                    "s": {
+                                        "a": 0,
+                                        "k": [100, 100]
+                                    },
+
+                                    "o": {
+                                        "a": 0,
+                                        "k": 100
+                                    },
+
+                                    "nm": "Transform"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+
+        /* =================================
+           INITIALIZE WELCOME ANIMATION
+        ================================== */
+
+        let welcomeAnimation = null;
+        let formAnimation = null;
+
+
+        welcomeAnimation = lottie.loadAnimation({
+            container:
+                document.getElementById(
+                    "lottieWelcome"
+                ),
+
+            renderer: "svg",
+
+            loop: true,
+
+            autoplay: true,
+
+            animationData:
+                sunglassesEmojiData
+        });
+
+
+        /* =================================
+           GO TO FORM
+        ================================== */
+
         function goToForm() {
-            document.getElementById('pageWelcome').classList.remove('active');
-            const pageForm = document.getElementById('pageForm');
-            pageForm.classList.add('active');
-            
-            // Сброс и перезапуск анимации всплытия контента на втором экране
-            const textElement = document.getElementById('formText');
-            textElement.style.animation = 'none';
-            textElement.offsetHeight; 
-            textElement.style.animation = null;
+
+            const welcomePage =
+                document.getElementById(
+                    "pageWelcome"
+                );
+
+            const formPage =
+                document.getElementById(
+                    "pageForm"
+                );
+
+
+            welcomePage.classList.remove(
+                "active"
+            );
+
+            formPage.classList.add(
+                "active"
+            );
+
+
+            /* Не создаём несколько
+               экземпляров анимации */
+
+            if (!formAnimation) {
+
+                formAnimation =
+                    lottie.loadAnimation({
+
+                        container:
+                            document.getElementById(
+                                "lottieForm"
+                            ),
+
+                        renderer: "svg",
+
+                        loop: true,
+
+                        autoplay: true,
+
+                        animationData:
+                            airplaneEmojiData
+                    });
+            }
+
+
+            /* Перезапуск анимации текста */
+
+            const textElement =
+                document.getElementById(
+                    "formText"
+                );
+
+            textElement.style.animation =
+                "none";
+
+            void textElement.offsetHeight;
+
+            textElement.style.animation =
+                "slideUpIn 0.5s cubic-bezier(0.1, 1, 0.1, 1) forwards";
         }
 
-        def submitData() {
-            const name = document.getElementById('botName').value.trim();
-            let username = document.getElementById('botUsername').value.trim();
+
+        /* =================================
+           SUBMIT
+        ================================== */
+
+        function submitData() {
+
+            const name =
+                document
+                    .getElementById("botName")
+                    .value
+                    .trim();
+
+
+            let username =
+                document
+                    .getElementById("botUsername")
+                    .value
+                    .trim();
+
+
+            /* Проверка */
 
             if (!name || !username) {
-                tg.showAlert("⚠️ Пожалуйста, заполните все поля!");
+
+                tg.showAlert(
+                    "⚠️ Пожалуйста, заполните все поля!"
+                );
+
                 return;
             }
 
-            if (username.startsWith('@')) {
-                username = username.substring(1);
+
+            /* Убираем @ */
+
+            if (
+                username.startsWith("@")
+            ) {
+
+                username =
+                    username.substring(1);
             }
 
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerText = "⏳ Отправка в матрицу...";
 
-            const payload = JSON.stringify({
-                bot_name: name,
-                bot_username: username
-            });
+            /* Проверяем username */
+
+            const usernameRegex =
+                /^[a-zA-Z0-9_]{5,32}$/;
+
+
+            if (
+                !usernameRegex.test(username)
+            ) {
+
+                tg.showAlert(
+                    "⚠️ Юзернейм должен содержать от 5 до 32 символов: латинские буквы, цифры и _"
+                );
+
+                return;
+            }
+
+
+            /* Кнопка */
+
+            const submitBtn =
+                document.getElementById(
+                    "submitBtn"
+                );
+
+
+            submitBtn.disabled = true;
+
+            submitBtn.innerText =
+                "⏳ Отправка в матрицу...";
+
+
+            /* Данные */
+
+            const payload =
+                JSON.stringify({
+
+                    bot_name: name,
+
+                    bot_username:
+                        username
+
+                });
+
+
+            console.log(
+                "Отправляем:",
+                payload
+            );
+
+
+            /*
+             * Передаём данные
+             * Telegram Mini App → бот
+             */
 
             tg.sendData(payload);
+        }
+
+    </script>
+
+</body>
+</html>
         }
     </script>
 </body>

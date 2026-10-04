@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KRONEV Factory</title>
-    <!-- Подключаем официальный SDK Telegram -->
     <script src="https://telegram.org"></script>
     <style>
         :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #000000);
-            --hint-color: var(--tg-theme-hint-color, #707579);
-            --button-color: var(--tg-theme-button-color, #3390ec);
-            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            --bg-color: #17212b; /* Фирменный темно-серый фон Telegram */
+            --bg-secondary: #242f3d; /* Дополнительный темный оттенок */
+            --text-color: #f5f6f7;
+            --neon-green: #39ff14; /* Салатовый неоновый */
+            --neon-dimmed: rgba(57, 255, 20, 0.25); /* Приглушенный неон */
+            --hint-color: #7f8c8d;
         }
 
         body {
@@ -25,204 +24,256 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            min-height: calc(100vh - 40px);
+            justify-content: center;
+            min-height: 100vh;
             box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
         }
 
-        .container {
+        /* Приглушенная неоновая ретро-сетка */
+        .retro-grid {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            background-image: 
+                linear-gradient(var(--neon-dimmed) 1px, transparent 1px),
+                linear-gradient(90deg, var(--neon-dimmed) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: 1;
+            /* Плавное затухание по краям (верх и низ) */
+            mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+            /* Медленное циклическое мигание сетки */
+            animation: gridPulse 6s ease-in-out infinite;
+        }
+
+        .page {
             width: 100%;
             max-width: 400px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            animation: fadeIn 0.5s ease-in-out;
+            z-index: 2;
         }
 
-        .header-icon {
-            font-size: 64px;
-            margin-bottom: 10px;
+        .page.active {
+            display: flex;
+        }
+
+        /* Анимированный эмодзи в очках */
+        .emoji-container {
+            font-size: 84px;
+            margin-bottom: 20px;
             display: inline-block;
-            animation: pulse 2s infinite;
+            z-index: 2;
+            /* Цикл анимации эмодзи каждые 3 секунды */
+            animation: emojiAnimate 3s ease-in-out infinite;
+        }
+
+        /* Всплывающий снизу на сантиметр текст */
+        .slide-up-text {
+            animation: slideUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            opacity: 0;
         }
 
         h1 {
-            font-size: 24px;
-            margin: 0 0 10px 0;
+            font-size: 22px;
             font-weight: 700;
+            margin: 0 0 15px 0;
+            padding: 0 10px;
         }
 
         p {
-            font-size: 15px;
-            color: var(--hint-color);
-            line-height: 1.4;
-            margin: 0 0 25px 0;
+            font-size: 16px;
+            color: #b2bec3;
+            line-height: 1.5;
+            margin: 0 0 30px 0;
+            padding: 0 15px;
+        }
+
+        /* Стили формы на 2-м экране */
+        .form-container {
+            width: 90%;
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid rgba(57, 255, 20, 0.15);
+            margin-bottom: 25px;
         }
 
         .form-group {
-            background-color: var(--secondary-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: left;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
         }
 
         label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            color: var(--button-color);
+            color: var(--neon-green);
             margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 12px;
-            font-size: 16px;
-            color: var(--hint-color);
+            letter-spacing: 1px;
         }
 
         input {
             width: 100%;
-            padding: 12px 12px 12px 38px;
-            border: 1px solid transparent;
-            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
             background-color: var(--bg-color);
             color: var(--text-color);
             font-size: 16px;
             box-sizing: border-box;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         input:focus {
             outline: none;
-            border-color: var(--button-color);
-            box-shadow: 0 0 0 3px rgba(51, 144, 236, 0.15);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 8px rgba(57, 255, 20, 0.2);
         }
 
-        /* Telegram Главная кнопка внизу экрана */
-        .action-btn {
-            width: 100%;
-            max-width: 400px;
-            background-color: var(--button-color);
-            color: var(--button-text-color);
+        /* Кнопки в стиле киберпанк/тг */
+        .btn {
+            width: 90%;
+            background-color: var(--neon-green);
+            color: #000000;
             border: none;
             border-radius: 12px;
             padding: 16px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.1s ease, opacity 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-top: 20px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(57, 255, 20, 0.3);
         }
 
-        .action-btn:active {
-            transform: scale(0.98);
+        .btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 5px rgba(57, 255, 20, 0.2);
         }
 
-        .action-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        /* --- Анимации --- */
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 0.5; }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes emojiAnimate {
+            0%, 100% { transform: scale(1) translateY(0); }
+            40% { transform: scale(1.08) translateY(-8px); }
+            50% { transform: scale(0.95) translateY(2px) rotate(3deg); }
+            60% { transform: scale(1.02) translateY(-2px) rotate(-3deg); }
+            70% { transform: scale(1) translateY(0); }
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px); /* Смещение вниз ~ на 1 см */
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header-icon">🤖</div>
-        <h1>Создание бизнес-бота</h1>
-        <p>Задайте базовые параметры для вашего будущего бота. Настройки можно будет изменить позже.</p>
+    <!-- Задний фон: Неоновая ретро-сетка -->
+    <div class="retro-grid"></div>
 
-        <!-- Поле ввода Имени -->
-        <div class="form-group">
-            <label for="botName">✨ Название бота</label>
-            <div class="input-wrapper">
-                <span class="input-icon">🏷️</span>
-                <input type="text" id="botName" value="KRONEV Business Bot" placeholder="Например: Салон Красоты">
-            </div>
+    <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
+    <div id="pageWelcome" class="page active">
+        <div class="emoji-container">😎</div>
+        <div class="slide-up-text">
+            <h1>Создай своего KRONEV</h1>
+            <p>Привет! Здесь ты можешь создать своего личного KRONEV для автоматизации бизнеса. Начнём?</p>
         </div>
-
-        <!-- Поле ввода Юзернейма -->
-        <div class="form-group">
-            <label for="botUsername">🔗 Юзернейм (Псевдоним)</label>
-            <div class="input-wrapper">
-                <span class="input-icon">@</span>
-                <input type="text" id="botUsername" value="KronevTestBot" placeholder="Например: MySalonBot">
-            </div>
-        </div>
+        <button class="btn" onclick="goToForm()">🚀 Начать</button>
     </div>
 
-    <!-- Кнопка действия -->
-    <button id="submitBtn" class="action-btn">🚀 Создать бота через Telegram</button>
+    <!-- ЭКРАН 2: ВВОД ДАННЫХ -->
+    <div id="pageForm" class="page">
+        <div class="emoji-container">🤖</div>
+        <div class="slide-up-text" id="formTextHeader">
+            <h1>Параметры робота</h1>
+            <p>Задайте базовые имя и юзернейм для автоматического развертывания.</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-group">
+                <label>🏷️ Название бота</label>
+                <input type="text" id="botName" value="KRONEV Business Bot">
+            </div>
+            <div class="form-group">
+                <label>🔗 Юзернейм бота (@)</label>
+                <input type="text" id="botUsername" value="KronevTestBot">
+            </div>
+        </div>
+
+        <button class="btn" id="submitBtn" onclick="submitData()">✨ Сгенерировать бота</button>
+    </div>
 
     <script>
-        // Инициализируем Telegram WebApp
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // Расширяем на весь экран для удобства
+        tg.expand();
 
-        const submitBtn = document.getElementById('submitBtn');
-        const botNameInput = document.getElementById('botName');
-        const botUsernameInput = document.getElementById('botUsername');
+        // Переключение на экран ввода формы
+        function goToForm() {
+            document.getElementById('pageWelcome').classList.remove('active');
+            const pageForm = document.getElementById('pageForm');
+            pageForm.classList.add('active');
+            
+            // Сбрасываем и заново триггерим анимацию всплывания текста на новом экране
+            const textHeader = document.getElementById('formTextHeader');
+            textHeader.style.animation = 'none';
+            textHeader.offsetHeight; /* триггер reflow */
+            textHeader.style.animation = null;
+        }
 
-        submitBtn.addEventListener('click', () => {
-            const name = botNameInput.value.trim();
-            let username = botUsernameInput.value.trim();
+        // Прямая отправка данных серверу без багованных JS-окон
+        function submitData() {
+            const name = document.getElementById('botName').value.trim();
+            let username = document.getElementById('botUsername').value.trim();
 
             if (!name || !username) {
-                tg.showAlert("⚠️ Пожалуйста, заполните все поля!");
+                tg.showAlert("⚠️ Пожалуйста, заполните поля!");
                 return;
             }
 
-            // Очищаем юзернейм от символа @, если пользователь его ввел
             if (username.startsWith('@')) {
                 username = username.substring(1);
             }
 
-            submitBtn.disabled = true;
-            submitBtn.innerText = "⏳ Ожидание в Telegram...";
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerText = "⏳ Отправка данных...";
 
-            try {
-                // Вызываем системное диалоговое окно создания управляемого бота
-                tg.requestManagedBot({
-                    request_id: 1001,
-                    suggested_name: name,
-                    suggested_username: username
-                }, (result) => {
-                    // Callback обрабатывает отправку, если закрыли или создали
-                    if (result && result.bot_user) {
-                        // Бот успешно создан пользователем в нативном окне
-                        tg.close();
-                    } else {
-                        // Пользователь отменил создание
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = "🚀 Создать бота через Telegram";
-                    }
-                });
-            } catch (e) {
-                tg.showAlert("Ошибка вызова интерфейса: " + e.message);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "🚀 Создать бота через Telegram";
-            }
+            // Упаковываем данные в JSON-строку
+            const payload = JSON.stringify({
+                bot_name: name,
+                bot_username: username
+            });
+
+            // Напрямую шлем текстовую дату боту в чат. Окно закроется автоматически.
+            tg.sendData(payload);
+        }
+    </script>
+</body>
+</html>
         });
     </script>
 </body>

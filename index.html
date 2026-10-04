@@ -4,16 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KRONEV Factory</title>
+    <!-- Официальный SDK Telegram -->
     <script src="https://telegram.org"></script>
+    <!-- Официальная библиотека Lottie для рендеринга фирменных TGS/JSON анимаций -->
+    <script src="https://cloudflare.com"></script>
     <style>
         :root {
-            --bg-color: #17212b; /* Оригинальный темно-серый фон Telegram */
+            --bg-color: #17212b; /* Родной темно-серый фон Telegram */
             --bg-secondary: #242f3d;
             --text-color: #f5f6f7;
-            /* Матричный зеленый неон */
-            --matrix-neon: #00ff41; 
+            --matrix-neon: #00ff41; /* Матричный зеленый */
             --matrix-dimmed: rgba(0, 255, 65, 0.12);
-            --matrix-dark-btn: #003b11; /* Темно-зеленый неон для кнопок */
+            --matrix-dark-btn: #003b11; /* Глубокий темно-зеленый для кнопок */
             --matrix-border: #008f11;
         }
 
@@ -31,28 +33,24 @@
             box-sizing: border-box;
             overflow: hidden;
             position: relative;
-            /* Задаем глобальную 3D-перспективу для сцены */
-            perspective: 800px;
+            perspective: 800px; /* 3D Глубина сцены */
         }
 
-        /* 3D Ретро-сетка в стиле Матрицы (под наклоном камеры) */
+        /* 3D Ретро-сетка в стиле Матрицы */
         .retro-grid {
             position: absolute;
             top: 15%;
             left: 50%;
             width: 600px;
             height: 600px;
-            /* Сдвигаем по центру и наклоняем по оси X, создавая эффект лежащей плоскости */
-            transform: translateX(-50%) rotateX(65deg);
+            transform: translateX(-50%) rotateX(65deg); /* Наклон камеры сверху вниз */
             background-image: 
                 linear-gradient(var(--matrix-dimmed) 1.5px, transparent 1.5px),
                 linear-gradient(90deg, var(--matrix-dimmed) 1.5px, transparent 1.5px);
             background-size: 40px 40px;
             z-index: 1;
-            /* Плавное затухание (fade) сверху и снизу */
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 75%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 75%, transparent);
-            /* Мягкое циклическое мерцание всей сетки */
             animation: matrixPulse 6s ease-in-out infinite;
         }
 
@@ -70,27 +68,16 @@
             display: flex;
         }
 
-        /* Контейнер для имитации векторной анимации Telegram */
-        .emoji-container {
-            font-size: 88px;
-            margin-bottom: 25px;
-            display: inline-block;
-            position: relative;
+        /* Контейнер для загрузки векторных Lottie-эмодзи */
+        .lottie-emoji {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
             z-index: 2;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.2));
+            filter: drop-shadow(0 0 15px rgba(0, 255, 65, 0.3));
         }
 
-        /* Анимация для Эмодзи в очках 😎 (Покачивание и блики) */
-        .emoji-sunglasses {
-            animation: tgSunglassesAnimate 3s ease-in-out infinite;
-        }
-
-        /* Анимация для Бумажного самолетика ✈️ (Полёт по восьмерке и покачивание крена) */
-        .emoji-airplane {
-            animation: tgAirplaneAnimate 3s ease-in-out infinite;
-        }
-
-        /* Всплывающий строго на 1 сантиметр (12px) текст */
+        /* Анимация всплытия текста ровно на 1 сантиметр (12px) */
         .slide-up-text {
             opacity: 0;
             animation: slideUpIn 0.5s cubic-bezier(0.1, 1, 0.1, 1) forwards;
@@ -110,7 +97,6 @@
             margin: 0 0 35px 0;
         }
 
-        /* Стили формы на втором слайде */
         .form-container {
             width: 100%;
             background-color: var(--bg-secondary);
@@ -124,6 +110,7 @@
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-group:last-child {
@@ -138,7 +125,6 @@
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            text-align: left;
         }
 
         input {
@@ -159,7 +145,7 @@
             box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
         }
 
-        /* Кнопки в стиле Матрицы (Темно-зеленый неон с ярким бордером) */
+        /* Кнопки "Матрица" — темный неон с яркой окантовкой */
         .btn {
             width: 100%;
             background-color: var(--matrix-dark-btn);
@@ -187,52 +173,33 @@
             cursor: not-allowed;
         }
 
-        /* --- АНИМАЦИИ --- */
-
-        /* Медленное дыхание сетки */
+        /* --- Тайминги и Ключевые Кадры --- */
         @keyframes matrixPulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
+            0%, 100% { opacity: 0.25; }
+            50% { opacity: 0.55; }
         }
 
-        /* Всплытие текста ровно за 1 см (12px) до основной точки */
         @keyframes slideUpIn {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(12px); /* Смещение вниз ~ 1 см */
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
-        /* Воссоздание логики ТГ-анимации для 😎 */
-        @keyframes tgSunglassesAnimate {
-            0%, 100% { transform: scale(1) translateY(0) rotate(0deg); }
-            30% { transform: scale(1.05) translateY(-5px) rotate(-2deg); }
-            45% { transform: scale(0.97) translateY(1px) rotate(2deg); }
-            60% { transform: scale(1.02) translateY(-2px) rotate(-1deg); }
-            75% { transform: scale(1) translateY(0) rotate(0deg); }
-        }
-
-        /* Воссоздание логики ТГ-анимации для ✈️ (летит и покачивается) */
-        @keyframes tgAirplaneAnimate {
-            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-            25% { transform: translate(4px, -6px) rotate(-4deg) scale(1.02); }
-            50% { transform: translate(-2px, -2px) rotate(3deg) scale(0.98); }
-            75% { transform: translate(3px, -4px) rotate(-2deg) scale(1.01); }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Задний план: Наклоненная 3D сетка матрицы -->
+    <!-- Ретро-сетка матрицы под наклоном камеры -->
     <div class="retro-grid"></div>
 
     <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
     <div id="pageWelcome" class="page active">
-        <div class="emoji-container emoji-sunglasses">😎</div>
+        <!-- Контейнер для оригинального ТГ-смайлика 😎 -->
+        <div id="lottieWelcome" class="lottie-emoji"></div>
         <div class="slide-up-text" id="welcomeText">
             <h1>Создай своего KRONEV</h1>
             <p>Привет! Здесь ты можешь создать своего личного KRONEV для автоматизации бизнеса. Начнём?</p>
@@ -240,9 +207,10 @@
         <button class="btn" onclick="goToForm()">🚀 Начать</button>
     </div>
 
-    <!-- ЭКРАН 2: ФОРМА СОЗДАНИЯ -->
+    <!-- ЭКРАН 2: ВВОД ДАННЫХ -->
     <div id="pageForm" class="page">
-        <div class="emoji-container emoji-airplane">✈️</div>
+        <!-- Контейнер для оригинального ТГ-самолетика ✈️ -->
+        <div id="lottieForm" class="lottie-emoji"></div>
         <div class="slide-up-text" id="formText">
             <h1>Параметры робота</h1>
             <p>Задайте базовые имя и юзернейм для автоматического развертывания.</p>
@@ -267,16 +235,40 @@
         tg.ready();
         tg.expand();
 
+        // Переменные для хранения инстансов Lottie
+        let welcomeAnimation = null;
+        let formAnimation = null;
+
+        // Инициализируем смайлик в очках на 1-м экране (чистый Telegram JSON)
+        welcomeAnimation = lottie.loadAnimation({
+            container: document.getElementById('lottieWelcome'),
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'https://lottiefiles.com' // Оригинальный ТГ-стиль 😎
+        });
+
         function goToForm() {
-            // Переключаем активные экраны
+            // Переключаем экраны
             document.getElementById('pageWelcome').classList.remove('active');
             const pageForm = document.getElementById('pageForm');
             pageForm.classList.add('active');
             
-            // Перезапускаем анимацию всплытия текста строго для второго экрана
+            // Если анимация самолетика еще не запущена — инициализируем (чистый Telegram JSON)
+            if (!formAnimation) {
+                formAnimation = lottie.loadAnimation({
+                    container: document.getElementById('lottieForm'),
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: 'https://lottiefiles.com' // Фирменный самолетик ✈️
+                });
+            }
+
+            // Сбрасываем и триггерим анимацию всплывания текста на новом экране (на 1 см)
             const textElement = document.getElementById('formText');
             textElement.style.animation = 'none';
-            textElement.offsetHeight; /* принудительный перерасчет стилей браузером */
+            textElement.offsetHeight; /* триггер reflow */
             textElement.style.animation = null;
         }
 
@@ -291,13 +283,22 @@
 
             if (username.startsWith('@')) {
                 username = username.substring(1);
-                }
+            }
+
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerText = "⏳ Отправка в матрицу...";
+
             const payload = JSON.stringify({
-            bot_name: name,
-            bot_username: username
+                bot_name: name,
+                bot_username: username
+            });
+
+            Используйте код с осторожностью.
+            // Напрямую шлем JSON строку бэкенду
+            tg.sendData(payload);
+            }
+
             });
             // Безопасно передаем данные на Python бэкенд
             tg.sendData(payload);

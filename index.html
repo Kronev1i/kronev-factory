@@ -7,12 +7,14 @@
     <script src="https://telegram.org"></script>
     <style>
         :root {
-            --bg-color: #17212b; /* Фирменный темно-серый фон Telegram */
-            --bg-secondary: #242f3d; /* Дополнительный темный оттенок */
+            --bg-color: #17212b; /* Оригинальный темно-серый фон Telegram */
+            --bg-secondary: #242f3d;
             --text-color: #f5f6f7;
-            --neon-green: #39ff14; /* Салатовый неоновый */
-            --neon-dimmed: rgba(57, 255, 20, 0.25); /* Приглушенный неон */
-            --hint-color: #7f8c8d;
+            /* Матричный зеленый неон */
+            --matrix-neon: #00ff41; 
+            --matrix-dimmed: rgba(0, 255, 65, 0.12);
+            --matrix-dark-btn: #003b11; /* Темно-зеленый неон для кнопок */
+            --matrix-border: #008f11;
         }
 
         body {
@@ -29,26 +31,29 @@
             box-sizing: border-box;
             overflow: hidden;
             position: relative;
+            /* Задаем глобальную 3D-перспективу для сцены */
+            perspective: 800px;
         }
 
-        /* Приглушенная неоновая ретро-сетка */
+        /* 3D Ретро-сетка в стиле Матрицы (под наклоном камеры) */
         .retro-grid {
             position: absolute;
-            top: 25%;
+            top: 15%;
             left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 300px;
+            width: 600px;
+            height: 600px;
+            /* Сдвигаем по центру и наклоняем по оси X, создавая эффект лежащей плоскости */
+            transform: translateX(-50%) rotateX(65deg);
             background-image: 
-                linear-gradient(var(--neon-dimmed) 1px, transparent 1px),
-                linear-gradient(90deg, var(--neon-dimmed) 1px, transparent 1px);
-            background-size: 30px 30px;
+                linear-gradient(var(--matrix-dimmed) 1.5px, transparent 1.5px),
+                linear-gradient(90deg, var(--matrix-dimmed) 1.5px, transparent 1.5px);
+            background-size: 40px 40px;
             z-index: 1;
-            /* Плавное затухание по краям (верх и низ) */
-            mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
-            /* Медленное циклическое мигание сетки */
-            animation: gridPulse 6s ease-in-out infinite;
+            /* Плавное затухание (fade) сверху и снизу */
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 75%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 75%, transparent);
+            /* Мягкое циклическое мерцание всей сетки */
+            animation: matrixPulse 6s ease-in-out infinite;
         }
 
         .page {
@@ -65,51 +70,60 @@
             display: flex;
         }
 
-        /* Анимированный эмодзи в очках */
+        /* Контейнер для имитации векторной анимации Telegram */
         .emoji-container {
-            font-size: 84px;
-            margin-bottom: 20px;
+            font-size: 88px;
+            margin-bottom: 25px;
             display: inline-block;
+            position: relative;
             z-index: 2;
-            /* Цикл анимации эмодзи каждые 3 секунды */
-            animation: emojiAnimate 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.2));
         }
 
-        /* Всплывающий снизу на сантиметр текст */
+        /* Анимация для Эмодзи в очках 😎 (Покачивание и блики) */
+        .emoji-sunglasses {
+            animation: tgSunglassesAnimate 3s ease-in-out infinite;
+        }
+
+        /* Анимация для Бумажного самолетика ✈️ (Полёт по восьмерке и покачивание крена) */
+        .emoji-airplane {
+            animation: tgAirplaneAnimate 3s ease-in-out infinite;
+        }
+
+        /* Всплывающий строго на 1 сантиметр (12px) текст */
         .slide-up-text {
-            animation: slideUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             opacity: 0;
+            animation: slideUpIn 0.5s cubic-bezier(0.1, 1, 0.1, 1) forwards;
         }
 
         h1 {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 700;
             margin: 0 0 15px 0;
-            padding: 0 10px;
+            letter-spacing: 0.5px;
         }
 
         p {
             font-size: 16px;
             color: #b2bec3;
             line-height: 1.5;
-            margin: 0 0 30px 0;
-            padding: 0 15px;
+            margin: 0 0 35px 0;
         }
 
-        /* Стили формы на 2-м экране */
+        /* Стили формы на втором слайде */
         .form-container {
-            width: 90%;
+            width: 100%;
             background-color: var(--bg-secondary);
             border-radius: 16px;
-            padding: 20px;
+            padding: 22px;
             box-sizing: border-box;
-            border: 1px solid rgba(57, 255, 20, 0.15);
-            margin-bottom: 25px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .form-group {
             margin-bottom: 20px;
-            text-align: left;
         }
 
         .form-group:last-child {
@@ -119,17 +133,18 @@
         label {
             display: block;
             font-size: 12px;
-            font-weight: 600;
-            color: var(--neon-green);
+            font-weight: 700;
+            color: var(--matrix-neon);
             margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            text-align: left;
         }
 
         input {
             width: 100%;
             padding: 14px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -140,75 +155,95 @@
 
         input:focus {
             outline: none;
-            border-color: var(--neon-green);
-            box-shadow: 0 0 8px rgba(57, 255, 20, 0.2);
+            border-color: var(--matrix-neon);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
         }
 
-        /* Кнопки в стиле киберпанк/тг */
+        /* Кнопки в стиле Матрицы (Темно-зеленый неон с ярким бордером) */
         .btn {
-            width: 90%;
-            background-color: var(--neon-green);
-            color: #000000;
-            border: none;
+            width: 100%;
+            background-color: var(--matrix-dark-btn);
+            color: var(--matrix-neon);
+            border: 2px solid var(--matrix-border);
             border-radius: 12px;
             padding: 16px;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(57, 255, 20, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.15);
+            letter-spacing: 0.5px;
         }
 
         .btn:active {
             transform: scale(0.97);
-            box-shadow: 0 2px 5px rgba(57, 255, 20, 0.2);
+            background-color: var(--matrix-border);
+            color: #000000;
+            box-shadow: 0 0 15px var(--matrix-neon);
         }
 
-        /* --- Анимации --- */
-        @keyframes gridPulse {
-            0%, 100% { opacity: 0.25; }
-            50% { opacity: 0.5; }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        @keyframes emojiAnimate {
-            0%, 100% { transform: scale(1) translateY(0); }
-            40% { transform: scale(1.08) translateY(-8px); }
-            50% { transform: scale(0.95) translateY(2px) rotate(3deg); }
-            60% { transform: scale(1.02) translateY(-2px) rotate(-3deg); }
-            70% { transform: scale(1) translateY(0); }
+        /* --- АНИМАЦИИ --- */
+
+        /* Медленное дыхание сетки */
+        @keyframes matrixPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
-        @keyframes slideUp {
+        /* Всплытие текста ровно за 1 см (12px) до основной точки */
+        @keyframes slideUpIn {
             from {
                 opacity: 0;
-                transform: translateY(12px); /* Смещение вниз ~ на 1 см */
+                transform: translateY(12px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
+
+        /* Воссоздание логики ТГ-анимации для 😎 */
+        @keyframes tgSunglassesAnimate {
+            0%, 100% { transform: scale(1) translateY(0) rotate(0deg); }
+            30% { transform: scale(1.05) translateY(-5px) rotate(-2deg); }
+            45% { transform: scale(0.97) translateY(1px) rotate(2deg); }
+            60% { transform: scale(1.02) translateY(-2px) rotate(-1deg); }
+            75% { transform: scale(1) translateY(0) rotate(0deg); }
+        }
+
+        /* Воссоздание логики ТГ-анимации для ✈️ (летит и покачивается) */
+        @keyframes tgAirplaneAnimate {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            25% { transform: translate(4px, -6px) rotate(-4deg) scale(1.02); }
+            50% { transform: translate(-2px, -2px) rotate(3deg) scale(0.98); }
+            75% { transform: translate(3px, -4px) rotate(-2deg) scale(1.01); }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Задний фон: Неоновая ретро-сетка -->
+    <!-- Задний план: Наклоненная 3D сетка матрицы -->
     <div class="retro-grid"></div>
 
     <!-- ЭКРАН 1: ПРИВЕТСТВИЕ -->
     <div id="pageWelcome" class="page active">
-        <div class="emoji-container">😎</div>
-        <div class="slide-up-text">
+        <div class="emoji-container emoji-sunglasses">😎</div>
+        <div class="slide-up-text" id="welcomeText">
             <h1>Создай своего KRONEV</h1>
             <p>Привет! Здесь ты можешь создать своего личного KRONEV для автоматизации бизнеса. Начнём?</p>
         </div>
         <button class="btn" onclick="goToForm()">🚀 Начать</button>
     </div>
 
-    <!-- ЭКРАН 2: ВВОД ДАННЫХ -->
+    <!-- ЭКРАН 2: ФОРМА СОЗДАНИЯ -->
     <div id="pageForm" class="page">
-        <div class="emoji-container">🤖</div>
-        <div class="slide-up-text" id="formTextHeader">
+        <div class="emoji-container emoji-airplane">✈️</div>
+        <div class="slide-up-text" id="formText">
             <h1>Параметры робота</h1>
             <p>Задайте базовые имя и юзернейм для автоматического развертывания.</p>
         </div>
@@ -232,49 +267,38 @@
         tg.ready();
         tg.expand();
 
-        // Переключение на экран ввода формы
         function goToForm() {
+            // Переключаем активные экраны
             document.getElementById('pageWelcome').classList.remove('active');
             const pageForm = document.getElementById('pageForm');
             pageForm.classList.add('active');
             
-            // Сбрасываем и заново триггерим анимацию всплывания текста на новом экране
-            const textHeader = document.getElementById('formTextHeader');
-            textHeader.style.animation = 'none';
-            textHeader.offsetHeight; /* триггер reflow */
-            textHeader.style.animation = null;
+            // Перезапускаем анимацию всплытия текста строго для второго экрана
+            const textElement = document.getElementById('formText');
+            textElement.style.animation = 'none';
+            textElement.offsetHeight; /* принудительный перерасчет стилей браузером */
+            textElement.style.animation = null;
         }
 
-        // Прямая отправка данных серверу без багованных JS-окон
         function submitData() {
             const name = document.getElementById('botName').value.trim();
             let username = document.getElementById('botUsername').value.trim();
 
             if (!name || !username) {
-                tg.showAlert("⚠️ Пожалуйста, заполните поля!");
+                tg.showAlert("⚠️ Пожалуйста, заполните все поля!");
                 return;
             }
 
             if (username.startsWith('@')) {
                 username = username.substring(1);
-            }
-
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('submitBtn').innerText = "⏳ Отправка данных...";
-
-            // Упаковываем данные в JSON-строку
+                }
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "⏳ Отправка в матрицу...";
             const payload = JSON.stringify({
-                bot_name: name,
-                bot_username: username
+            bot_name: name,
+            bot_username: username
             });
-
-            // Напрямую шлем текстовую дату боту в чат. Окно закроется автоматически.
+            // Безопасно передаем данные на Python бэкенд
             tg.sendData(payload);
-        }
-    </script>
-</body>
-</html>
-        });
-    </script>
-</body>
-</html>
+            }
